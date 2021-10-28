@@ -1,25 +1,32 @@
 #include <Windows.h>
 #include <detours.h>
 
-static void (WINAPI* RealGetSystemInfo)(LPSYSTEM_INFO info) = GetSystemInfo;
+#include "Patches/Patches.h"
 
-void WINAPI GetSystemInfoDetour(LPSYSTEM_INFO info)
+static void (WINAPI* RealGetStartupInfo)(LPSTARTUPINFOA info) = GetStartupInfoA;
+
+void WINAPI GetStartupInfoDetour(LPSTARTUPINFOA info)
 {
-	RealGetSystemInfo(info);
+	RealGetStartupInfo(info);
 
-	//dow2 will hang if greater than 12 cores
-	if (info->dwNumberOfProcessors > 12)
-		info->dwNumberOfProcessors = 12;
+	Patches::Apply();
+
+	//this should only be called once
+	//but to be safe we remove this hook
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	DetourDetach(&(PVOID&)RealGetStartupInfo, GetStartupInfoDetour);
+	DetourTransactionCommit();
 }
 
 bool Init(HINSTANCE hModule)
 {
 	DisableThreadLibraryCalls(hModule);
 
+	//Get us an entry outside of loader lock
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
-	//hook GetSystemInfo
-	DetourAttach(&(PVOID&)RealGetSystemInfo, GetSystemInfoDetour);
+	DetourAttach(&(PVOID&)RealGetStartupInfo, GetStartupInfoDetour);
 	DetourTransactionCommit();
 
 	return true;
