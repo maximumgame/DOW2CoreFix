@@ -4,19 +4,18 @@
 #include "Patches/Patches.h"
 
 static void (WINAPI* RealGetStartupInfo)(LPSTARTUPINFOA info) = GetStartupInfoA;
+static bool hasAttached = false;
+
 
 void WINAPI GetStartupInfoDetour(LPSTARTUPINFOA info)
 {
 	RealGetStartupInfo(info);
 
-	Patches::Apply();
-
-	//this should only be called once
-	//but to be safe we remove this hook
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourDetach(&(PVOID&)RealGetStartupInfo, GetStartupInfoDetour);
-	DetourTransactionCommit();
+	if (!hasAttached)
+	{
+		hasAttached = true;
+		Patches::Apply();
+	}
 }
 
 bool Init(HINSTANCE hModule)

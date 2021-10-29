@@ -12,7 +12,7 @@ namespace
 
 	int __stdcall FMOD_System_SetHardwareChannels_Detour(int a1, int a2, int a3, int a4, int a5)
 	{
-		auto result = RealFMOD_System_SetHardwareChannels(a1, a2, a3, a4, a5); //infinite loop
+		auto result = RealFMOD_System_SetHardwareChannels(a1, a2, a3, a4, a5);
 		return result;
 	}
 
@@ -21,7 +21,7 @@ namespace
 
 	int __stdcall FMOD_System_SetSoftwareChannels_Detour(int a1, int a2)
 	{
-		auto result = RealFMOD_System_SetSoftwareChannels(a1, a2); //infinite loop
+		auto result = RealFMOD_System_SetSoftwareChannels(a1, a2);
 		return result;
 	}
 
