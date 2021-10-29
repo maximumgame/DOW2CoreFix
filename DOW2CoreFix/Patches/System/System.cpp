@@ -10,9 +10,8 @@ namespace
 	{
 		RealGetSystemInfo(info);
 
-		//dow2 will hang if greater than 12 cores
-		if (info->dwNumberOfProcessors > 12)
-			info->dwNumberOfProcessors = 12;
+		if (info->dwNumberOfProcessors > 31)
+			info->dwNumberOfProcessors = 31;
 	}
 }
 namespace Patches::System
